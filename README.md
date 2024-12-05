@@ -1,7 +1,10 @@
-# Sudoku solver
+<h1 align="center">
+  Sudoku solver
+</h1>
+
 This project brings together my passion for Sudoku and my desire to learn a new programming language - Rust. Despite my initial unfamiliarity, I took the challenge and discovered that Rust is not only powerful and exceptionally fast but also really enjoyable to code in.
 
-## Approach
+## 💡 Approach
 The solver employs a **backtracking** algorithm to progressively solve a given puzzle. It keeps track of all the empty cells and makes use of **bitmasks** to instantly fetch all the possible candidates for a specific cell.
 
 It can also be configured to use a **heuristic** known as **MRV** (Minimum Remaining Values) which prioritizes selecting the cells with fewer candidates first. When enabled, this option enhances the solver's efficieny by increasing the likelihood of finding a solution or identifying contradictions early in the process. 
@@ -10,7 +13,7 @@ It can also be configured to use a **heuristic** known as **MRV** (Minimum Remai
 
 **In practice**, depending on the provided dataset, this option can either speed up the algorithm by as much as **1000x** (particularly for 17 clue grids with overall large candidates sets), or it might marginally affect performance (typically applies to easy grids, as the number of candidates for each cell is already very small, making the selection of the best cell almost redundant).
 
-## Benchmarks
+## 📊 Benchmarks
 There are 3 main datasets I used for benchmarking:
 
 | [Easy](https://www.kaggle.com/datasets/bryanpark/sudoku) | [Medium](https://www.kaggle.com/datasets/rohanrao/sudoku) | [Hard](https://www.kaggle.com/datasets/radcliffe/3-million-sudoku-puzzles-with-ratings) |
@@ -54,7 +57,7 @@ Additionally, I used [this dataset](https://github.com/t-dillon/tdoku/blob/maste
 
 </div>
 
-## Update log
+## 📋 Update log
 - **v1.0** - Plain backtracking with no optimizations
 - **v1.1** - A few tweaks, including backtracking shortcuts and better compiler configuration
 
@@ -68,7 +71,7 @@ Additionally, I used [this dataset](https://github.com/t-dillon/tdoku/blob/maste
 
 - **v3.0** - Complete file restructure for improved readability and configurability
 
-## Configuration
+## ⚙️ Configuration
 
 ### Template
 Each input grid has to respect the following template:
@@ -80,7 +83,7 @@ Each input grid has to respect the following template:
 
 
 ### Configuration file
-Once you've prepared a file with your desired puzzles, navigate to the **src/config.rs** file and adjust your configuration settings as needed.
+Once you've prepared a file with your desired puzzles, navigate to the `src/config.rs` file and adjust your configuration settings as needed.
 
 ```rust
 pub const FILE_NAME: &str = "";             // Input file path
@@ -94,7 +97,7 @@ pub const PRINT_SOLVED_GRIDS: bool = false; // Option to print solved grids to s
 pub const MRV_HEURISTIC: bool = false;      // Option to enable fewer candidates first heuristic
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
 ### 1. Clone the project
 ```bash
@@ -110,6 +113,6 @@ cd Sudoku-solver
 [The configuration process is explained here](#configuration).
   
 ### 4. Launch the solver
-```sh
+```bash
 cargo run --release
 ```
