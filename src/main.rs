@@ -4,6 +4,7 @@ use std::fs::File;
 
 mod sudoku;
 mod config;
+
 use crate::sudoku::Sudoku;
 use crate::config::
 {
@@ -62,6 +63,7 @@ fn main()
             println!("Time elapsed: {} seconds", elapsed);
             println!("Average time per grid: {} seconds", elapsed / solved as f32);
             println!("Average grids per second: {}", solved as f32 / elapsed);
+            println!();
         }
     }
     else
