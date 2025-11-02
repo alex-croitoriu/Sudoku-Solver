@@ -2,13 +2,6 @@ use std::io::{self, BufRead};
 use std::time::Instant;
 use std::fs::File;
 
-#[cfg(target_os = "linux")]
-use tikv_jemallocator::Jemalloc;
-
-#[cfg(target_os = "linux")]
-#[global_allocator]
-static GLOBAL: Jemalloc = Jemalloc;
-
 mod sudoku;
 mod config;
 
