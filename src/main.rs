@@ -7,38 +7,40 @@ mod sudoku;
 
 use crate::config::{
     BENCHMARK as benchmark, FILE_PATH as file_path, MAX_GRIDS as max_grids,
-    PRINT_SOLVED_GRIDS as print_solved_grids, USE_MRV_HEURISTIC as use_mrv_heuristic,
+    PRINT_SOLVED_GRIDS as print_solved_grids,
 };
 use crate::sudoku::Sudoku;
 
 fn main() {
     let mut grids_solved = 0;
-    let start = Instant::now();
+    let mut elapsed = 0f32;
 
     if let Ok(file) = File::open(file_path) {
         let buffer = io::BufReader::with_capacity(1_000_000, file);
 
         for (i, line) in buffer.lines().enumerate() {
+            let start = Instant::now();
             if i as isize == max_grids {
                 break;
             }
             if let Ok(line) = line {
-                match Sudoku::new(line.trim(), use_mrv_heuristic) {
-                    Ok(mut sudoku) => {
-                        match sudoku.solve(0) {
-                            Some(()) => grids_solved += 1,
-                            None => println!("Grid on line {} has no solution", i + 1),
+                match Sudoku::new(line.trim()) {
+                    Ok(mut sudoku) => match sudoku.solve(0) {
+                        Some(()) => {
+                            elapsed += start.elapsed().as_secs_f32();
+                            grids_solved += 1;
+                            if print_solved_grids {
+                                println!("{}", sudoku);
+                            }
                         }
-                        if print_solved_grids {
-                            println!("{}", sudoku);
-                        }
-                    }
-                    Err(e) => eprintln!("Invalid grid on line {}: {e}", i + 1),
+                        None => println!("Grid on line {} has no solution\n", i + 1),
+                    },
+                    Err(e) => eprintln!("Invalid grid on line {}: {e}\n", i + 1),
                 }
             }
         }
 
-        let elapsed = start.elapsed().as_secs_f32();
+        // let elapsed = start.elapsed().as_secs_f32();
 
         println!("Grids solved: {}", grids_solved);
 
