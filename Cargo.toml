@@ -1,15 +1,16 @@
 [package]
-name="main"
-version="0.1.0"
-edition="2024"
+name = "main"
+version = "0.1.0"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow="1.0"
+anyhow = "1.0"
+threadpool = "1.8.1"
+clap = { version = "4.5.53", features = ["derive"] }
 
 [profile.release]
-lto=true
-codegen-units=1
-panic='abort'
-opt-level=3
+lto = true
+opt-level = 3
+codegen-units = 1

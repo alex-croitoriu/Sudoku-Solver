@@ -9,6 +9,13 @@ pub struct Sudoku {
     empty_cells: Vec<(usize, usize, usize)>,
 }
 
+#[derive(Clone)]
+pub enum Status {
+    Solved([[u8; 9]; 9]),
+    Unsolved(usize),
+    Invalid(usize, String),
+}
+
 impl Sudoku {
     pub fn new(line: &str) -> Result<Self> {
         let mut grid = [[0u8; 9]; 9];
@@ -51,9 +58,9 @@ impl Sudoku {
         })
     }
 
-    pub fn solve(&mut self, current_index: usize) -> Option<()> {
+    pub fn solve(&mut self, current_index: usize) -> Option<[[u8; 9]; 9]> {
         if current_index == self.empty_cells.len() {
-            return Some(());
+            return Some(self.grid);
         }
 
         let mut best_index = current_index;
@@ -91,7 +98,7 @@ impl Sudoku {
 
             if self.solve(current_index + 1).is_some() {
                 self.grid[row][col] = candidate_bit.trailing_zeros() as u8 + 1;
-                return Some(());
+                return Some(self.grid);
             }
 
             self.row_mask[row] ^= candidate_bit;
@@ -105,21 +112,46 @@ impl Sudoku {
     }
 }
 
-impl fmt::Display for Sudoku {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "+-------+-------+-------+")?;
-
-        for i in 0..9 {
-            write!(f, "| ")?;
-            for j in 0..9 {
-                write!(f, "{} ", self.grid[i][j])?;
-                if j % 3 == 2 {
-                    write!(f, "| ")?;
+impl Status {
+    pub fn pretty(&self) -> String {
+        match self {
+            Status::Solved(grid) => {
+                let mut s = String::new();
+                for (i, row) in grid.iter().enumerate() {
+                    if i % 3 == 0 {
+                        s.push_str("+-------+-------+-------+\n");
+                    }
+                    for (j, cell) in row.iter().enumerate() {
+                        if j % 3 == 0 {
+                            s.push_str("| ");
+                        }
+                        s.push_str(&format!("{cell} "));
+                    }
+                    s.push_str("|\n");
                 }
+                s.push_str("+-------+-------+-------+\n");
+                s
             }
-            writeln!(f)?;
-            if i % 3 == 2 {
-                writeln!(f, "+-------+-------+-------+")?;
+            _ => self.to_string(),
+        }
+    }
+}
+impl fmt::Display for Status {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Status::Solved(grid) => {
+                for row in grid {
+                    for cell in row {
+                        write!(f, "{cell}")?;
+                    }
+                }
+                writeln!(f)?;
+            }
+            Status::Unsolved(line) => {
+                writeln!(f, "Grid on line {line} has no solution")?;
+            }
+            Status::Invalid(line, message) => {
+                writeln!(f, "Invalid grid on line {line}: {message}")?;
             }
         }
 
