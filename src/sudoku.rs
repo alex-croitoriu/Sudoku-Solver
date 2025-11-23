@@ -85,7 +85,6 @@ impl Sudoku {
         self.empty_cells.swap(current_index, best_index);
 
         let (row, col, block) = self.empty_cells[current_index];
-
         let mask = self.row_mask[row] | self.col_mask[col] | self.block_mask[block];
         let mut candidates_mask = !mask & 511;
 

@@ -1,10 +1,9 @@
 use anyhow::{Result, anyhow};
 use clap::Parser;
+use rayon::prelude::*;
 use std::fs::File;
-use std::io::{BufRead, BufReader, BufWriter, Write};
-use std::sync::{Arc, Mutex};
+use std::io::{BufWriter, Write};
 use std::time::Instant;
-use threadpool::ThreadPool;
 
 mod args;
 mod sudoku;
@@ -15,64 +14,33 @@ use crate::sudoku::{Status, Sudoku};
 fn main() -> Result<()> {
     let args = Cli::parse();
 
-    let file = match File::open(&args.input_file) {
-        Ok(file) => file,
-        Err(_) => Err(anyhow!("File '{}' not found", args.input_file))?,
+    let content = std::fs::read_to_string(&args.input_file)
+        .map_err(|_| anyhow!("File '{}' not found", args.input_file))?;
+    let lines = content
+        .lines()
+        .take(args.grid_limit.unwrap_or(usize::MAX))
+        .collect::<Vec<&str>>();
+
+    let solve_closure = |(i, line): (usize, &&str)| match Sudoku::new(line.trim()) {
+        Ok(mut sudoku) => match sudoku.solve(0) {
+            Some(grid) => Status::Solved(grid),
+            None => Status::Unsolved(i + 1),
+        },
+        Err(e) => Status::Invalid(i + 1, e.to_string()),
     };
 
-    let size = file.metadata()?.len() as usize;
-    let line_count = size / 82;
-
-    let buffer = BufReader::with_capacity(size, file);
-    let mut results = Vec::with_capacity(line_count);
+    let results: Vec<Status>;
 
     let start = Instant::now();
 
     if let Some(threads) = args.threads {
-        let pool = ThreadPool::new(threads);
-        let pool_results = Arc::new(Mutex::new(Vec::<Status>::new()));
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(threads)
+            .build_global()?;
 
-        for (i, line) in buffer.lines().enumerate() {
-            let pool_results = pool_results.clone();
-            if let Ok(line) = line {
-                pool.execute(move || match Sudoku::new(line.trim()) {
-                    Ok(mut sudoku) => {
-                        let result = sudoku.solve(0);
-                        if let Ok(mut pool_results) = pool_results.lock() {
-                            match result {
-                                Some(grid) => pool_results.push(Status::Solved(grid)),
-                                None => pool_results.push(Status::Unsolved(i + 1)),
-                            }
-                        }
-                    }
-                    Err(e) => {
-                        if let Ok(mut pool_results) = pool_results.lock() {
-                            pool_results.push(Status::Invalid(i + 1, e.to_string()))
-                        }
-                    }
-                });
-            }
-        }
-
-        pool.join();
-        if let Ok(pool_results) = pool_results.lock() {
-            results = pool_results.clone();
-        }
+        results = lines.par_iter().enumerate().map(solve_closure).collect();
     } else {
-        for (i, line) in buffer.lines().enumerate() {
-            // if let Some(max_results) = args.max_results && max_results == i {
-            //     break;
-            // }
-            if let Ok(line) = line {
-                match Sudoku::new(line.trim()) {
-                    Ok(mut sudoku) => match sudoku.solve(0) {
-                        Some(grid) => results.push(Status::Solved(grid)),
-                        None => results.push(Status::Unsolved(i + 1)),
-                    },
-                    Err(e) => results.push(Status::Invalid(i + 1, e.to_string())),
-                }
-            }
-        }
+        results = lines.iter().enumerate().map(solve_closure).collect();
     }
 
     let elapsed = start.elapsed();
@@ -96,8 +64,7 @@ fn main() -> Result<()> {
             Ok(file) => file,
             Err(_) => Err(anyhow!("File '{output_file}' not found"))?,
         };
-
-        let mut buffer = BufWriter::with_capacity(size, file);
+        let mut buffer = BufWriter::new(file);
         for result in results {
             if args.pretty_print {
                 write!(buffer, "{}", result.pretty())?;
@@ -105,7 +72,6 @@ fn main() -> Result<()> {
                 write!(buffer, "{result}")?;
             }
         }
-
         buffer.flush()?;
     }
 
