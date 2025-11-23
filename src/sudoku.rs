@@ -10,7 +10,6 @@ pub struct Sudoku {
 }
 
 impl Sudoku {
-    #[inline(always)]
     pub fn new(line: &str) -> Result<Self> {
         let mut grid = [[0u8; 9]; 9];
         let (mut row_mask, mut col_mask, mut block_mask) = ([0; 9], [0; 9], [0; 9]);
@@ -25,7 +24,7 @@ impl Sudoku {
             if !byte.is_ascii_digit() {
                 return Err(anyhow!("non-digit character(s) found"));
             }
-            grid[i / 9][i % 9] = byte as u8 - '0' as u8;
+            grid[i / 9][i % 9] = byte - b'0';
         }
 
         for row in 0..9 {

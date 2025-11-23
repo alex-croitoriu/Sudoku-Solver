@@ -30,7 +30,7 @@ fn main() {
                             elapsed += start.elapsed().as_secs_f32();
                             grids_solved += 1;
                             if print_solved_grids {
-                                println!("{}", sudoku);
+                                println!("{sudoku}");
                             }
                         }
                         None => println!("Grid on line {} has no solution\n", i + 1),
@@ -40,12 +40,10 @@ fn main() {
             }
         }
 
-        // let elapsed = start.elapsed().as_secs_f32();
-
-        println!("Grids solved: {}", grids_solved);
+        println!("Grids solved: {grids_solved}");
 
         if benchmark {
-            println!("Time elapsed: {} seconds", elapsed);
+            println!("Time elapsed: {elapsed} seconds");
             println!(
                 "Average time per grid: {} ms",
                 (elapsed * 1000f32) / grids_solved as f32
@@ -57,6 +55,6 @@ fn main() {
             println!();
         }
     } else {
-        eprintln!("File '{}' not found", file_path);
+        eprintln!("File '{file_path}' not found");
     }
 }
