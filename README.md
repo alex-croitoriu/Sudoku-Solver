@@ -18,7 +18,7 @@ There are 4 main datasets I used for benchmarking: [easy](https://www.kaggle.com
 The following benchmarks were generated with the help of [hyperfine](https://github.com/sharkdp/hyperfine). The solver was ran 10 times on each dataset with the `--no-progress` option (because it's slightly faster).
 
 <div align="center">
-  <img width="1517" height="1080" alt="b2" src="https://github.com/user-attachments/assets/8b9e984a-a087-433d-a592-bbd2c49df767" />
+  <img width="1533" height="1080" alt="b1" src="https://github.com/user-attachments/assets/b801928a-33cc-4e5c-94cd-182d2102e902" />
   <img width="1517" height="1080" alt="b2" src="https://github.com/user-attachments/assets/de9c1dc3-0712-47e4-967a-c93e4b107967" />
   
   <br/>
