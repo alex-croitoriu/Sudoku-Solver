@@ -74,12 +74,30 @@ The solver accepts several command-line arguments:
 Examples:
 
 ```bash 
-# Reads from example.txt, writes to output.txt, uses 4 threads and writes results in human-readable format
-./solver -i example.txt -o output.txt -m 4 -f
+# Solves grids from a file using 4 threads and writes formatted output
+./sudoku-solver -i example.txt -o output.txt -m 4 -f
 
-# Reads from example.txt, doesn't dump output, solves maximum 10 grids and doesn't print the progress bar
-./solver -i example.txt -g 10 --no-progress
+# Limits grids to 10 and doesn't print a progress bar
+./sudoku-solver -i example.txt -g 10 --no-progress
  
-# Solves the grid directly
-./solver -s "000000000000000001000002030000003020001040000005000060030000004070080009620007000" 
+# Solves a single grid directly
+./sudoku-solver -s "000000000000000001000002030000003020001040000005000060030000004070080009620007000" 
+```
+
+## Quick start
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/alex-croitoriu/Sudoku-Solver.git
+cd Sudoku-Solver
+```
+
+### 2. Build the release version
+```bash
+cargo build --release
+```
+  
+### 3. Run the executable
+```bash
+./target/release/sudoku-solver -i example.txt
 ```
