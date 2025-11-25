@@ -17,11 +17,16 @@ There are 4 main datasets I used for benchmarking: [easy](https://www.kaggle.com
 
 The following benchmarks were generated with the help of [hyperfine](https://github.com/sharkdp/hyperfine). The solver was ran 10 times on each dataset with the `--no-progress` option (because it's slightly faster).
 
-<img src="https://github.com/JellyGamez/Sudoku-solver/assets/75379898/c4b9ba4d-d2cc-4c0a-8e95-9d353be72d56" width="700px">
+<div align="center">
 
+<img src="https://github.com/JellyGamez/Sudoku-solver/assets/75379898/c4b9ba4d-d2cc-4c0a-8e95-9d353be72d56" width="700px">
 <img src="https://github.com/JellyGamez/Sudoku-solver/assets/75379898/4aedca9f-55cf-41b4-8c17-3d7abe75129e" width="700px">
 
+</div>
+
 ## Raw data
+
+<div align="center">
 
 | Grids/second | Single thread | Multithreading |
 |--------------|---------------|----------------|
@@ -59,7 +64,10 @@ The solver accepts several command-line arguments:
 Examples:
 
 ```bash 
-./solver -i dataset.txt -o output.txt -m 4 -f # Reads from dataset.txt, outputs to output.txt, uses 4 threads and writes results in human-readable format
-./solver -i dataset.txt -g 1000 --no-progress # Reads from dataset.txt, doesn't dump output, solves maximum 1000 grids and doesn't print the progress bar
-./solver -s "000000000000000001000002030000003020001040000005000060030000004070080009620007000" # Solves the grid directly
+# Reads from dataset.txt, outputs to output.txt, uses 4 threads and writes results in human-readable format
+./solver -i dataset.txt -o output.txt -m 4 -f 
+# Reads from dataset.txt, doesn't dump output, solves maximum 1000 grids and doesn't print the progress bar
+./solver -i dataset.txt -g 1000 --no-progress 
+# Solves the grid directly
+./solver -s "000000000000000001000002030000003020001040000005000060030000004070080009620007000" 
 ```
