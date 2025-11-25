@@ -10,7 +10,7 @@ On the algorithmics side, the solver uses optimized backtracking to progressivel
 
 It also uses the MRV (Minimum Remaining Values) heuristic which prioritizes selecting the cells with fewer candidates first, greatly reducing the number of possibilities that need to be explored in the search tree. With some optimizations such as pruning early if there are 0 candidates remaining for a cell or selecting the first cell with exactly 1 candidate, MRV proves to be an improvement in all cases.
 
-When it comes to the code itself, Rust makes it really easy to treat all errors and assure no undefined behavior, while keeping everything fast. The performance drop was insignificant after implementing strict validations, proper error handling and command line options parsing.
+When it comes to the code itself, Rust makes it really easy to treat all errors and assure no undefined behavior, while keeping everything fast. The performance drop was insignificant after implementing strict validations, proper error handling and command line option parsing.
 
 ## Benchmarks
 There are 4 main datasets I used for benchmarking: [easy](https://www.kaggle.com/datasets/bryanpark/sudoku), [medium](https://www.kaggle.com/datasets/rohanrao/sudoku), [hard](https://www.kaggle.com/datasets/radcliffe/3-million-sudoku-puzzles-with-ratings) and [17 clues](https://github.com/t-dillon/tdoku/blob/master/data.zip).
@@ -18,23 +18,19 @@ There are 4 main datasets I used for benchmarking: [easy](https://www.kaggle.com
 The following benchmarks were generated with the help of [hyperfine](https://github.com/sharkdp/hyperfine). The solver was ran 10 times on each dataset with the `--no-progress` option (because it's slightly faster).
 
 <div align="center">
-
-<img src="https://github.com/JellyGamez/Sudoku-solver/assets/75379898/c4b9ba4d-d2cc-4c0a-8e95-9d353be72d56" width="700px">
-<img src="https://github.com/JellyGamez/Sudoku-solver/assets/75379898/4aedca9f-55cf-41b4-8c17-3d7abe75129e" width="700px">
-
-</div>
-
-## Raw data
-
-<div align="center">
-
-| Grids/second | Single thread | Multithreading |
-|--------------|---------------|----------------|
-| Easy         | 622878        | 4776029        |
-| Medium       | 540866        | 3853361        |
-| Hard         | 81707         | 560216         |
-| 17 clues     | 1110          | 7508           |
-
+  <img width="1517" height="1080" alt="b2" src="https://github.com/user-attachments/assets/8b9e984a-a087-433d-a592-bbd2c49df767" />
+  <img width="1517" height="1080" alt="b2" src="https://github.com/user-attachments/assets/de9c1dc3-0712-47e4-967a-c93e4b107967" />
+  
+  <br/>
+  <br/>
+  
+  Raw data:
+  | Dataset      | Single thread | Multithreading |
+  |--------------|---------------|----------------|
+  | Easy         | 622878        | 4776029        |
+  | Medium       | 540866        | 3853361        |
+  | Hard         | 81707         | 560216         |
+  | 17 clues     | 1110          | 7508           |
 </div>
 
 ## Format
