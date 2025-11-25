@@ -47,9 +47,9 @@ The following benchmarks were generated with the help of [hyperfine](https://git
   | 17 clues     | 1.110         | 7.508          |
 </div>
 
-## Format
+## Input format
 
-Each input grid has to respect the following format:
+Each grid has to be in the following format:
 
 - Must be a string with length 81
 - Must use '0' to denote empty cells and digits from '1' to '9' for cells that are already solved
