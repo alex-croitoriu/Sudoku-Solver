@@ -2,22 +2,19 @@ use clap::{ArgGroup, Parser};
 
 #[derive(Parser)]
 #[command(name = "Sudoku Solver")]
-#[command(group(
-    ArgGroup::new("input")
-        .required(true)
-        .multiple(false)
-))]
+#[command(group(ArgGroup::new("input").args(["input_file", "single"]).required(true).multiple(false)))]
+#[command(group(ArgGroup::new("format_target").args(["output_file", "single"]).multiple(true)))]
 pub struct Cli {
     /// Path to input file containing grids
-    #[arg(short, long, group = "input")]
+    #[arg(short, long)]
     pub input_file: Option<String>,
 
     /// Path to output file for writing results
-    #[arg(short, long, group = "format_target", requires = "input_file")]
+    #[arg(short, long)]
     pub output_file: Option<String>,
 
     /// Pass a single grid directly
-    #[arg(short, long, group = "input", group = "format_target")]
+    #[arg(short, long, value_name = "GRID")]
     pub single: Option<String>,
 
     /// Use multithreading (uses all cpus if value not specified)

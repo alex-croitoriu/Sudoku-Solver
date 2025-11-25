@@ -12,10 +12,10 @@ mod sudoku;
 use crate::args::Cli;
 use crate::sudoku::{Status, Sudoku};
 
-fn write_results_to_file(output_file: &String, results: Vec<Status>, args: &Cli) -> Result<()> {
-    let file = match File::create(output_file) {
+fn write_results_to_file(file: &str, results: Vec<Status>, args: &Cli) -> Result<()> {
+    let file = match File::create(file) {
         Ok(file) => file,
-        Err(_) => Err(anyhow!("File '{output_file}' not found"))?,
+        Err(_) => Err(anyhow!("Failed to create file '{file}'"))?,
     };
     let mut buffer = BufWriter::with_capacity(results.len(), file);
     let bar = if args.no_progress {
@@ -24,7 +24,7 @@ fn write_results_to_file(output_file: &String, results: Vec<Status>, args: &Cli)
         ProgressBar::new(results.len() as u64)
     };
 
-    println!("\nWriting results to output file..");
+    println!("Writing results to output file..");
     for result in results {
         if args.format {
             write!(buffer, "{}", result.format())?;
@@ -39,9 +39,8 @@ fn write_results_to_file(output_file: &String, results: Vec<Status>, args: &Cli)
     Ok(())
 }
 
-fn solve_from_file(input_file: &String, args: &Cli) -> Result<(Vec<Status>, Duration)> {
-    let content = std::fs::read_to_string(input_file)
-        .map_err(|_| anyhow!("File '{input_file}' not found"))?;
+fn solve_grids_from_file(file: &str, args: &Cli) -> Result<(Vec<Status>, Duration)> {
+    let content = std::fs::read_to_string(file).map_err(|_| anyhow!("File '{file}' not found"))?;
     let lines = content
         .lines()
         .take(args.max_grids.unwrap_or(usize::MAX))
@@ -84,7 +83,7 @@ fn solve_from_file(input_file: &String, args: &Cli) -> Result<(Vec<Status>, Dura
 
     let start = Instant::now();
 
-    println!("Solving grids from '{input_file}'..");
+    println!("Solving grids from '{file}'..");
     if let Some(thread_count) = args.multithreading {
         rayon::ThreadPoolBuilder::new()
             .num_threads(thread_count)
@@ -95,47 +94,64 @@ fn solve_from_file(input_file: &String, args: &Cli) -> Result<(Vec<Status>, Dura
     }
 
     bar.finish_and_clear();
+    println!();
     let execution_time = start.elapsed();
 
     Ok((results, execution_time))
 }
+
+fn solve_single_grid(grid: &str) -> (Status, Duration) {
+    let start = Instant::now();
+
+    let result = match Sudoku::new(grid) {
+        Ok(mut sudoku) => match sudoku.solve(0) {
+            Some(grid) => Status::Solved(grid),
+            None => Status::Unsolved(None),
+        },
+        Err(e) => Status::Invalid(None, e.to_string()),
+    };
+
+    let execution_time = start.elapsed();
+
+    (result, execution_time)
+}
 fn main() -> Result<()> {
     let args = Cli::parse();
 
-    if let Some(input_file) = &args.input_file {
-        let (results, execution_time) = solve_from_file(input_file, &args)?;
+    if let Some(file) = &args.input_file {
+        let (results, execution_time) = solve_grids_from_file(file, &args)?;
         let solved_grids_count = results
             .iter()
             .filter(|s| matches!(s, Status::Solved(_)))
             .count();
 
-        println!("\nGrids solved: {solved_grids_count}/{}", results.len());
+        println!("Grids solved: {solved_grids_count}/{}", results.len());
         if !args.no_stats {
-            println!("Execution time: {} seconds", execution_time.as_secs_f32());
+            println!("Execution time: {}s", execution_time.as_secs_f32());
             println!(
                 "Average grids/second: {}",
                 solved_grids_count as f32 / execution_time.as_secs_f32()
             );
         }
+        println!();
+
+        if let Some(file) = &args.output_file {
+            write_results_to_file(file, results, &args)?;
+        }
+    } else if let Some(grid) = &args.single {
+        let (result, execution_time) = solve_single_grid(grid);
+
+        if !args.no_stats {
+            println!("Execution time: {} μs", execution_time.as_micros());
+            println!();
+        }
 
         if let Some(output_file) = &args.output_file {
-            write_results_to_file(output_file, results, &args)?;
-        }
-    }
-
-    if let Some(single) = &args.single {
-        let status = match Sudoku::new(single) {
-            Ok(mut sudoku) => match sudoku.solve(0) {
-                Some(grid) => Status::Solved(grid),
-                None => Status::Unsolved(None),
-            },
-            Err(e) => Status::Invalid(None, e.to_string()),
-        };
-
-        if args.format {
-            println!("{}", status.format());
+            write_results_to_file(output_file, vec![result], &args)?;
+        } else if args.format {
+            println!("{}", result.format());
         } else {
-            println!("{status}");
+            println!("{result}");
         }
     }
 
