@@ -10,7 +10,9 @@ On the algorithmics side, the solver uses optimized backtracking to progressivel
 
 It also uses the MRV (Minimum Remaining Values) heuristic which prioritizes selecting the cells with fewer candidates first, greatly reducing the number of possibilities that need to be explored in the search tree. With some optimizations such as pruning early if there are 0 candidates remaining for a cell or selecting the first cell with exactly 1 candidate, MRV proves to be an improvement in all cases.
 
-When it comes to the code itself, Rust makes it really easy to treat all errors and assure no undefined behavior, while keeping everything fast. The performance drop was insignificant after implementing strict validations, proper error handling and command line option parsing.
+Using multithreading is a no-brainer when it comes to large inputs that can easily be parallelized. But because the performance increase doesn't come from a direct optimization in the code itself, some may consider multithreading to be cheaty. That's why I defaulted to a single thread and added multithreading as an option.
+
+When it comes to the code itself, Rust makes it really easy to treat all errors and assure no undefined behavior, while keeping everything fast. The performance drop was insignificant after implementing strict validations, proper error handling and command line option parsing on top of the fast algorithm.
 
 ## Benchmarks
 There are 4 main datasets I used for benchmarking: [easy](https://www.kaggle.com/datasets/bryanpark/sudoku), [medium](https://www.kaggle.com/datasets/rohanrao/sudoku), [hard](https://www.kaggle.com/datasets/radcliffe/3-million-sudoku-puzzles-with-ratings) and [17 clues](https://github.com/t-dillon/tdoku/blob/master/data.zip).
