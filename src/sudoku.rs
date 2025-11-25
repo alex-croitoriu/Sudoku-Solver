@@ -1,131 +1,177 @@
+use anyhow::{Result, anyhow};
 use std::fmt;
-pub struct Sudoku
-{
-    board: [u32; 81],
-    used_row: [u32; 9],
-    used_col: [u32; 9],
-    used_box: [u32; 9],
-    empty: Vec<(usize, usize, usize)>,
-    pub solved: bool,
-    pub heuristic: bool,
-}
-impl Sudoku
-{
-    #[inline]
-    pub fn new(board: [u32; 81], heuristic: bool) -> Sudoku 
-    {
-        let mut empty: Vec<(usize, usize, usize)> = Vec::new();
-        let (mut used_row, mut used_col, mut used_box) = ([0; 9], [0; 9], [0; 9]);
-        for row in 0..9
-        {
-            for col in 0..9
-            {
-                let digit = board[row * 9 + col];
-                let ind = row / 3 * 3 + col / 3;
-                if board[9 * row + col] == 0
-                {
-                    empty.push((row, col, ind));
-                }
-                else 
-                {
-                    let digit = digit as usize;
-                    used_row[row] |= 1 << (digit - 1);
-                    used_col[col] |= 1 << (digit - 1);
-                    used_box[ind] |= 1 << (digit - 1);
-                }
-            }
-        }
-        Sudoku
-        {
-            board: board,
-            used_row: used_row,
-            used_col: used_col,
-            used_box: used_box,
-            empty: empty,
-            solved: false,
-            heuristic: heuristic,
-        }
-    }
 
-    //#[inline]
-    pub fn solve(&mut self, pos: usize)
-    {
-        if self.solved 
-        {
-            return;
-        }
-        if pos == self.empty.len() 
-        {
-            self.solved = true;
-            return;
-        }
-        if self.heuristic
-        {
-            let mut best = 1;
-            let mut fewest_candidates = 9;
-            for i in pos..self.empty.len()
-            {
-                let (row, col, ind) = self.empty[i];
-                let current_candidates = 9 - (self.used_row[row] | self.used_col[col] | self.used_box[ind]).count_ones();
-
-                if current_candidates < fewest_candidates
-                {
-                    fewest_candidates = current_candidates;
-                    best = i;
-                }
-            }
-            (self.empty[pos], self.empty[best]) = (self.empty[best], self.empty[pos]);
-        }
-        let (row, col, ind) = self.empty[pos];
-        let mut candidates = self.used_row[row] | self.used_col[col] | self.used_box[ind];
-
-        while candidates != 511
-        {
-            let candidate = 1u32.checked_shl(candidates.trailing_ones()).unwrap_or(0);
-            self.board[row * 9 + col] = candidates.trailing_ones() + 1;
-
-            self.used_row[row] |= candidate;
-            self.used_col[col] |= candidate;
-            self.used_box[ind] |= candidate;
-
-            self.solve(pos + 1);
-
-            if self.solved 
-            {
-                return;
-            }
-            
-            self.used_row[row] ^= candidate;
-            self.used_col[col] ^= candidate;
-            self.used_box[ind] ^= candidate;
-
-            candidates |= candidate;
-        }
-    }
+pub struct Sudoku {
+    grid: [[u8; 9]; 9],
+    row_mask: [u32; 9],
+    col_mask: [u32; 9],
+    block_mask: [u32; 9],
+    empty_cells: Vec<(usize, usize, usize)>,
 }
 
-impl fmt::Display for Sudoku 
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result 
-    {
-        writeln!(f, "+-------+-------+-------+")?;
-        for i in 0..9
-        {
-            write!(f, "| ")?;
-            for j in 0..9
-            {
-                write!(f, "{} ", self.board[i * 9 + j])?;
-                if j % 3 == 2
-                {
-                    write!(f, "| ")?;
+#[derive(Clone)]
+pub enum Status {
+    Solved([[u8; 9]; 9]),
+    Unsolved(Option<usize>),
+    Invalid(Option<usize>, String),
+}
+
+impl Sudoku {
+    pub fn new(line: &str) -> Result<Self> {
+        let mut grid = [[0u8; 9]; 9];
+        let (mut row_mask, mut col_mask, mut block_mask) = ([0; 9], [0; 9], [0; 9]);
+        let mut empty_cells: Vec<(usize, usize, usize)> = Vec::new();
+        empty_cells.reserve_exact(81);
+
+        if line.len() != 81 {
+            return Err(anyhow!("length is not 81"));
+        }
+
+        for (i, byte) in line.bytes().enumerate() {
+            if !byte.is_ascii_digit() {
+                return Err(anyhow!("non-digit character(s) found"));
+            }
+            grid[i / 9][i % 9] = byte - b'0';
+        }
+
+        for row in 0..9 {
+            for col in 0..9 {
+                let digit = grid[row][col] as usize;
+                let block = row / 3 * 3 + col / 3;
+
+                if digit == 0 {
+                    empty_cells.push((row, col, block));
+                } else {
+                    let digit = digit - 1;
+                    let bit = 1 << digit;
+
+                    if (row_mask[row] & bit != 0)
+                        || (col_mask[col] & bit != 0)
+                        || (block_mask[block] & bit != 0)
+                    {
+                        return Err(anyhow!("sudoku rules violation(s) found"));
+                    }
+
+                    row_mask[row] |= bit;
+                    col_mask[col] |= bit;
+                    block_mask[block] |= bit;
                 }
             }
-            writeln!(f)?;
-            if i % 3 == 2
-            {
-                writeln!(f, "+-------+-------+-------+")?;
+        }
+
+        Ok(Sudoku {
+            grid,
+            row_mask,
+            col_mask,
+            block_mask,
+            empty_cells,
+        })
+    }
+
+    pub fn solve(&mut self, current_index: usize) -> Option<[[u8; 9]; 9]> {
+        if current_index == self.empty_cells.len() {
+            return Some(self.grid);
+        }
+
+        let mut best_index = current_index;
+        let mut fewest_candidates = 9;
+
+        for (i, &(row, col, block)) in self.empty_cells[current_index..].iter().enumerate() {
+            let mask = self.row_mask[row] | self.col_mask[col] | self.block_mask[block];
+            let current_candidates = 9 - mask.count_ones();
+
+            if current_candidates == 0 {
+                return None;
+            }
+            if current_candidates == 1 {
+                best_index = i + current_index;
+                break;
+            }
+            if fewest_candidates > current_candidates {
+                fewest_candidates = current_candidates;
+                best_index = i + current_index;
             }
         }
-        writeln!(f)
+        self.empty_cells.swap(current_index, best_index);
+
+        let (row, col, block) = self.empty_cells[current_index];
+        let mask = self.row_mask[row] | self.col_mask[col] | self.block_mask[block];
+        let mut candidates_mask = !mask & 511;
+
+        while candidates_mask != 0 {
+            let candidate_bit = candidates_mask & candidates_mask.wrapping_neg();
+
+            self.row_mask[row] |= candidate_bit;
+            self.col_mask[col] |= candidate_bit;
+            self.block_mask[block] |= candidate_bit;
+
+            if self.solve(current_index + 1).is_some() {
+                self.grid[row][col] = candidate_bit.trailing_zeros() as u8 + 1;
+                return Some(self.grid);
+            }
+
+            self.row_mask[row] ^= candidate_bit;
+            self.col_mask[col] ^= candidate_bit;
+            self.block_mask[block] ^= candidate_bit;
+
+            candidates_mask &= candidates_mask - 1;
+        }
+
+        None
+    }
+}
+
+impl Status {
+    pub fn format(&self) -> String {
+        match self {
+            Status::Solved(grid) => {
+                let mut s = String::new();
+                for (i, row) in grid.iter().enumerate() {
+                    if i % 3 == 0 {
+                        s.push_str("+-------+-------+-------+\n");
+                    }
+                    for (j, cell) in row.iter().enumerate() {
+                        if j % 3 == 0 {
+                            s.push_str("| ");
+                        }
+                        s.push_str(&format!("{cell} "));
+                    }
+                    s.push_str("|\n");
+                }
+                s.push_str("+-------+-------+-------+\n");
+                s
+            }
+            _ => self.to_string(),
+        }
+    }
+}
+impl fmt::Display for Status {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Status::Solved(grid) => {
+                for row in grid {
+                    for cell in row {
+                        write!(f, "{cell}")?;
+                    }
+                }
+                writeln!(f)?;
+            }
+            Status::Unsolved(line) => {
+                if let Some(line) = line {
+                    write!(f, "Grid on line {line} has no solution")?;
+                } else {
+                    write!(f, "Grid has no solution")?;
+                }
+            }
+            Status::Invalid(line, message) => {
+                if let Some(line) = line {
+                    write!(f, "Invalid grid on line {line}: {message}")?;
+                } else {
+                    write!(f, "Invalid grid: {message}")?;
+                }
+            }
+        }
+
+        Ok(())
     }
 }
