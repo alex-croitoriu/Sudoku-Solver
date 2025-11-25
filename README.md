@@ -41,10 +41,10 @@ The following benchmarks were generated with the help of [hyperfine](https://git
   
   | Dataset      | Single thread | Multithreading |
   |--------------|---------------|----------------|
-  | Easy         | 622878        | 4776029        |
-  | Medium       | 540866        | 3853361        |
-  | Hard         | 81707         | 560216         |
-  | 17 clues     | 1110          | 7508           |
+  | Easy         | 622.878       | 4.776.029      |
+  | Medium       | 540.866       | 3.853.361      |
+  | Hard         | 81.707        | 560.216        |
+  | 17 clues     | 1.110         | 7.508          |
 </div>
 
 ## Format
