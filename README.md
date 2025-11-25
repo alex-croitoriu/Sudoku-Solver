@@ -21,6 +21,7 @@ Key features:
 - Runtime statistics
 - Formatted output
 - Progress bars for solving and writing output - [indicatif](https://docs.rs/indicatif/latest/indicatif/)
+- Command line options for flexible conguration - [clap](https://docs.rs/clap/latest/clap/)
 
 ## Benchmarks
 There are 4 main datasets I used for benchmarking: [easy](https://www.kaggle.com/datasets/bryanpark/sudoku), [medium](https://www.kaggle.com/datasets/rohanrao/sudoku), [hard](https://www.kaggle.com/datasets/radcliffe/3-million-sudoku-puzzles-with-ratings) and [17 clues](https://github.com/t-dillon/tdoku/blob/master/data.zip).
