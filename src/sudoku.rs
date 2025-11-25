@@ -12,8 +12,8 @@ pub struct Sudoku {
 #[derive(Clone)]
 pub enum Status {
     Solved([[u8; 9]; 9]),
-    Unsolved(usize),
-    Invalid(usize, String),
+    Unsolved(Option<usize>),
+    Invalid(Option<usize>, String),
 }
 
 impl Sudoku {
@@ -38,13 +38,23 @@ impl Sudoku {
             for col in 0..9 {
                 let digit = grid[row][col] as usize;
                 let block = row / 3 * 3 + col / 3;
+
                 if digit == 0 {
                     empty_cells.push((row, col, block));
                 } else {
                     let digit = digit - 1;
-                    row_mask[row] |= 1 << digit;
-                    col_mask[col] |= 1 << digit;
-                    block_mask[block] |= 1 << digit;
+                    let bit = 1 << digit;
+
+                    if (row_mask[row] & bit != 0)
+                        || (col_mask[col] & bit != 0)
+                        || (block_mask[block] & bit != 0)
+                    {
+                        return Err(anyhow!("sudoku rules violation(s) found"));
+                    }
+
+                    row_mask[row] |= bit;
+                    col_mask[col] |= bit;
+                    block_mask[block] |= bit;
                 }
             }
         }
@@ -112,7 +122,7 @@ impl Sudoku {
 }
 
 impl Status {
-    pub fn pretty(&self) -> String {
+    pub fn format(&self) -> String {
         match self {
             Status::Solved(grid) => {
                 let mut s = String::new();
@@ -147,10 +157,18 @@ impl fmt::Display for Status {
                 writeln!(f)?;
             }
             Status::Unsolved(line) => {
-                writeln!(f, "Grid on line {line} has no solution")?;
+                if let Some(line) = line {
+                    write!(f, "Grid on line {line} has no solution")?;
+                } else {
+                    write!(f, "Grid has no solution")?;
+                }
             }
             Status::Invalid(line, message) => {
-                writeln!(f, "Invalid grid on line {line}: {message}")?;
+                if let Some(line) = line {
+                    write!(f, "Invalid grid on line {line}: {message}")?;
+                } else {
+                    write!(f, "Invalid grid: {message}")?;
+                }
             }
         }
 
