@@ -2,6 +2,13 @@
   Sudoku solver
 </h1>
 
+<div align="center">
+  
+  ![Screencast From 2025-11-26 12-27-36](https://github.com/user-attachments/assets/c2cd11aa-4483-4266-8db0-81ef7d162136)
+
+</div>
+
+
 This project brings together my passion for Sudoku and my desire to learn a new programming language - Rust. Despite my initial unfamiliarity, I discovered that Rust is not only powerful and exceptionally fast but also really enjoyable to program in.
 
 ## Strategy
