@@ -33,7 +33,6 @@ The following benchmarks were generated with the help of [hyperfine](https://git
   <img width="1517" height="1080" alt="b2" src="https://github.com/user-attachments/assets/de9c1dc3-0712-47e4-967a-c93e4b107967" />
   
   <br/>
-  <br/>
   
   <h3> 
     Raw data
