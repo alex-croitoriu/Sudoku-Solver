@@ -12,10 +12,10 @@ mod sudoku;
 use crate::args::Cli;
 use crate::sudoku::{Status, Sudoku};
 
-fn write_results_to_file(file: &str, results: Vec<Status>, args: &Cli) -> Result<()> {
-    let file = match File::create(file) {
+fn write_results_to_file(path: &str, results: Vec<Status>, args: &Cli) -> Result<()> {
+    let file = match File::create(path) {
         Ok(file) => file,
-        Err(_) => Err(anyhow!("Failed to create file '{file}'"))?,
+        Err(_) => Err(anyhow!("Failed to create file '{path}'"))?,
     };
     let mut buffer = BufWriter::with_capacity(results.len(), file);
     let bar = if args.no_progress {
@@ -24,7 +24,7 @@ fn write_results_to_file(file: &str, results: Vec<Status>, args: &Cli) -> Result
         ProgressBar::new(results.len() as u64)
     };
 
-    println!("Writing results to output file..");
+    println!("Writing results to '{path}'..");
     for result in results {
         if args.format {
             write!(buffer, "{}", result.format())?;
@@ -39,8 +39,8 @@ fn write_results_to_file(file: &str, results: Vec<Status>, args: &Cli) -> Result
     Ok(())
 }
 
-fn solve_grids_from_file(file: &str, args: &Cli) -> Result<(Vec<Status>, Duration)> {
-    let content = std::fs::read_to_string(file).map_err(|_| anyhow!("File '{file}' not found"))?;
+fn solve_grids_from_file(path: &str, args: &Cli) -> Result<(Vec<Status>, Duration)> {
+    let content = std::fs::read_to_string(path).map_err(|_| anyhow!("File '{path}' not found"))?;
     let lines = content
         .lines()
         .take(args.max_grids.unwrap_or(usize::MAX))
@@ -83,7 +83,7 @@ fn solve_grids_from_file(file: &str, args: &Cli) -> Result<(Vec<Status>, Duratio
 
     let start = Instant::now();
 
-    println!("Solving grids from '{file}'..");
+    println!("Solving grids from '{path}'..");
     if let Some(thread_count) = args.multithreading {
         rayon::ThreadPoolBuilder::new()
             .num_threads(thread_count)
