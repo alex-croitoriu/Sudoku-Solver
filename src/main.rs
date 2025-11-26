@@ -133,9 +133,9 @@ fn main() -> Result<()> {
                 solved_grids_count as f32 / execution_time.as_secs_f32()
             );
         }
-        println!();
 
         if let Some(file) = &args.output_file {
+            println!();
             write_results_to_file(file, results, &args)?;
         }
     } else if let Some(grid) = &args.single {
@@ -149,9 +149,9 @@ fn main() -> Result<()> {
         if let Some(output_file) = &args.output_file {
             write_results_to_file(output_file, vec![result], &args)?;
         } else if args.format {
-            println!("{}", result.format());
+            print!("{}", result.format());
         } else {
-            println!("{result}");
+            print!("{result}");
         }
     }
 
