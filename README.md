@@ -4,7 +4,7 @@
 
 <div align="center">
   
-  ![Screencast From 2025-11-26 12-27-36](https://github.com/user-attachments/assets/c2cd11aa-4483-4266-8db0-81ef7d162136)
+![gif](https://github.com/user-attachments/assets/a9ad0a92-ebcd-4805-b7b1-338051796b1b)
 
 </div>
 
