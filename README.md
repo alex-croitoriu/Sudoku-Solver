@@ -3,8 +3,8 @@
 </h1>
 
 <div align="center">
-  
-![gif](https://github.com/user-attachments/assets/d5818ff2-21d0-4564-bea3-89c86ec007d9)
+
+![gif](https://github.com/user-attachments/assets/223a7816-4da2-493e-96a5-e3cdc41f11ca)
 
 </div>
 
