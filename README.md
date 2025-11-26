@@ -4,7 +4,7 @@
 
 <div align="center">
   
-![gif](https://github.com/user-attachments/assets/a9ad0a92-ebcd-4805-b7b1-338051796b1b)
+![gif](https://github.com/user-attachments/assets/d5818ff2-21d0-4564-bea3-89c86ec007d9)
 
 </div>
 
